@@ -5,7 +5,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.*;
 import java.awt.*;
-import java.util.function.IntConsumer;
+
+import ui.TableButtons.ButtonEditor;
+import ui.TableButtons.ButtonRenderer;
 
 public class ComputerManagerPanel extends JPanel {
 
@@ -21,7 +23,6 @@ public class ComputerManagerPanel extends JPanel {
 
     private static final int FORM_WIDTH = 300;
     private static final int ACTION_COL_WIDTH = 80;
-    private static final Dimension ACTION_BTN_SIZE = new Dimension(62, 24);
 
     // =====================================================
     // Fields
@@ -95,15 +96,16 @@ public class ComputerManagerPanel extends JPanel {
         fixColumnWidth(cm.getColumn(COL_UPDATE), ACTION_COL_WIDTH);
         fixColumnWidth(cm.getColumn(COL_DELETE), ACTION_COL_WIDTH);
 
+        // changes how the cell looks
+        // initially, the cell would only display the word "update" or "delete"
+        // ButtonRenderer will make a JButton inside that cell
+        // ButtonRenderer returns the updated cell
+
         cm.getColumn(COL_UPDATE).setCellRenderer(new ButtonRenderer());
         cm.getColumn(COL_UPDATE).setCellEditor(new ButtonEditor(this::startEditing));
 
         cm.getColumn(COL_DELETE).setCellRenderer(new ButtonRenderer());
         cm.getColumn(COL_DELETE).setCellEditor(new ButtonEditor(this::deleteComputer));
-
-        // No selection listener: clicking a row only highlights it.
-        // The form changes mode only through the Update button.
-        // OPTIONAL (later): add a double-click listener here that calls startEditing(row).
 
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
@@ -288,69 +290,5 @@ public class ComputerManagerPanel extends JPanel {
 
         secondaryButton.setText(editing ? "Cancel" : "Clear");
         formPanel.repaint();
-    }
-
-    // =====================================================
-    // Button cell support (UI only, no backend needed)
-    // =====================================================
-
-    /** A panel that centers a small fixed-size button inside the (larger) cell. */
-    private static class ActionCell extends JPanel {
-        final JButton button = new JButton();
-
-        ActionCell() {
-            super(new GridBagLayout());
-            button.setPreferredSize(ACTION_BTN_SIZE);
-            button.setFocusPainted(false);
-            button.setMargin(new Insets(0, 0, 0, 0));
-            add(button);
-        }
-
-        void configure(JTable table, Object value, boolean selected) {
-            // Later, for icons: button.setText(null); button.setIcon(...);
-            button.setText(value == null ? "" : value.toString());
-            setBackground(selected ? table.getSelectionBackground() : table.getBackground());
-        }
-    }
-
-    /** Paints the button look (a stamp, not clickable). */
-    private static class ButtonRenderer implements TableCellRenderer {
-        private final ActionCell cell = new ActionCell();
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            cell.configure(table, value, isSelected);
-            return cell;
-        }
-    }
-
-    /** The real, clickable JButton that the table swaps in when you click the cell. */
-    private static class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
-        private final ActionCell cell = new ActionCell();
-        private final IntConsumer onClick;
-        private int currentRow;
-
-        ButtonEditor(IntConsumer onClick) {
-            this.onClick = onClick;
-            cell.button.addActionListener(e -> {
-                int row = currentRow;
-                cancelCellEditing();
-                onClick.accept(row);       // row is a VIEW index
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            currentRow = row;
-            cell.configure(table, value, isSelected);
-            return cell;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return cell.button.getText();
-        }
     }
 }
