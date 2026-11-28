@@ -1,17 +1,13 @@
 package service;
 
-import model.Computer;
+import model.*;
 import repository.ComputerRepository;
 
 import java.util.List;
 
 public class ComputerService {
-
-    // Responsibility: the rules of the app. No Swing, no file code.
-    // Rule violations are reported by throwing IllegalArgumentException with a readable message.
-
-    private static final int NO_ID = -1;   // "no computer to ignore" (real ids start at 1)
-
+    private static final int NO_ID = -1;
+    private int nextId = 1;
     private final ComputerRepository repository;
 
     public ComputerService(ComputerRepository repository) {
@@ -25,26 +21,49 @@ public class ComputerService {
     public void addComputer(String name, String category) {
         String cleanName = name.trim();
         validateName(cleanName, NO_ID);
-        System.out.println("computer passed validation");
-        repository.add(cleanName, category);
+        repository.add(createComputer(nextId++, cleanName, category));
     }
 
-    public void updateComputer(int id, String name, String category) {
+    // helper
+    private Computer createComputer(int id, String name, String category) {
+        Computer newComputer = null;
+        if (category.equals("Standard")) {
+            newComputer = new StandardComputer(
+                id, name, category, true);
+        } else if (category.equals("Gaming")) {
+            newComputer = new GamingComputer(
+                id, name, category, true);
+        } else if (category.equals("Premium")) {
+            newComputer = new PremiumComputer(
+                id, name, category, true);
+        } else {
+            throw new IllegalArgumentException("Invalid computer category.");
+        }
+        return newComputer;
+    }
+
+    public void updateComputer(Computer computer, String name, String category) {
         String cleanName = name.trim();
-        validateName(cleanName, id);   // ignore this computer's own current name
-        // TODO (optional): validate that `category` is one of the allowed categories.
-        // TODO (later, Sessions): refuse to edit a computer that has an active session.
-        repository.update(new Computer(id, cleanName, category));
+        validateName(cleanName, computer.getId());
+        if (!computer.isAvailable()) {
+            throw new IllegalStateException(
+                "Cannot update a computer while it is in use."
+            );
+        }
+        repository.update(createComputer(computer.getId(), cleanName, category));
     }
 
-    public void deleteComputer(int id) {
-        // TODO (later, Sessions): if the computer has an active session, throw
-        //   new IllegalArgumentException("<name> is currently in use.") instead of deleting.
-        //   This needs access to the session service/repository.
+    public void deleteComputer(Computer computer) {
+        if (!computer.isAvailable()) {
+            throw new IllegalStateException(
+                "Cannot delete a computer while it is in use."
+            );
+        }
         // TODO (later): decide what happens to the computer's past session history.
-        repository.deleteById(id);
+        repository.deleteById(computer.getId());
     }
 
+    // helper
     private void validateName(String name, int ignoreId) {
         if (name.isEmpty()) {
             throw new IllegalArgumentException("Computer name is required.");
@@ -54,6 +73,7 @@ public class ComputerService {
         }
     }
 
+    // helper
     private boolean isDuplicateName(String name, int ignoreId) {
         for (Computer c : repository.findAll()) {
             if (c.getId() != ignoreId && c.getName().equalsIgnoreCase(name)) {

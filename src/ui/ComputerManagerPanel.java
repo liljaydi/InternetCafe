@@ -180,11 +180,11 @@ public class ComputerManagerPanel extends JPanel {
 
         try {
             if (editingComputer != null) {
-                service.updateComputer(editingComputer.getId(), name, category);
+                service.updateComputer(editingComputer, name, category);
             } else {
                 service.addComputer(name, category);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(),
                 "Validation", JOptionPane.WARNING_MESSAGE);
             return;
@@ -205,8 +205,8 @@ public class ComputerManagerPanel extends JPanel {
         if (choice != JOptionPane.YES_OPTION) return;
 
         try {
-            service.deleteComputer(computer.getId());
-        } catch (IllegalArgumentException e) {
+            service.deleteComputer(computer);
+        } catch (IllegalArgumentException | IllegalStateException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(),
                 "Cannot Delete", JOptionPane.WARNING_MESSAGE);
             return;

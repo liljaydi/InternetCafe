@@ -9,7 +9,6 @@ public class ComputerRepository {
 
     // Responsibility: store and load computers. No rules, no Swing.
     private final List<Computer> computers = new ArrayList<>();
-    private int nextId = 1;
 
     public ComputerRepository() {
         // TODO (optional, file storage): load data/computers.txt into `computers` here.
@@ -30,10 +29,8 @@ public class ComputerRepository {
     }
 
     /** Creates the computer with the next id, stores it, and returns it. */
-    public Computer add(String name, String category) {
-        Computer computer = new Computer(nextId++, name, category);
+    public Computer add(Computer computer) {
         computers.add(computer);
-        System.out.println("computer added in the system");
         // TODO (optional, file storage): call saveToFile() here.
         return computer;
     }
@@ -43,6 +40,7 @@ public class ComputerRepository {
         for (int i = 0; i < computers.size(); i++) {
             if (computers.get(i).getId() == computer.getId()) {
                 computers.set(i, computer);
+                System.out.println("replaced computer with the updated one");
                 // TODO (optional, file storage): call saveToFile() here.
                 return;
             }
@@ -51,6 +49,7 @@ public class ComputerRepository {
 
     public void deleteById(int id) {
         computers.removeIf(c -> c.getId() == id);
+        System.out.println("succcesfully removed computer");
         // TODO (optional, file storage): call saveToFile() here.
     }
 

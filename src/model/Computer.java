@@ -1,10 +1,9 @@
 package model;
 
-public class Computer {
+public abstract class Computer {
     private final int id;
     private final String name;
     private final String category;
-    // NOTE: no status here. Status belongs to the Session module.
 
     public Computer(int id, String name, String category) {
         this.id = id;
