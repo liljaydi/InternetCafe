@@ -13,10 +13,6 @@ import javax.swing.table.TableCellRenderer;
 public class TableButtons {
     private static final Dimension ACTION_BTN_SIZE = new Dimension(62, 24);
 
-    // =====================================================
-    // Button cell support (UI only, no backend needed)
-    // =====================================================
-
     // creates the button inside the cell
     static class ActionCell extends JPanel {
         final JButton button = new JButton();
@@ -31,13 +27,13 @@ public class TableButtons {
 
         void configure(JTable table, Object value, boolean selected) {
             // set value from the cell ("update" or "delete") as a button text
-            button.setText(value == null ? "" : value.toString());
+            button.setText(value.toString());
             // set background when selected or not
             setBackground(selected ? table.getSelectionBackground() : table.getBackground());
         }
     }
 
-    // calls the the button creator, and configure background
+    // calls the button creator, and configure background
     static class ButtonRenderer implements TableCellRenderer {
         // creates the button
         private final ActionCell cell = new ActionCell();
@@ -50,7 +46,7 @@ public class TableButtons {
         }
     }
 
-    /** The real, clickable JButton that the table swaps in when you click the cell. */
+    // The clickable JButton
     static class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private final ActionCell cell = new ActionCell();
         private final IntConsumer onClick;
@@ -61,10 +57,12 @@ public class TableButtons {
             cell.button.addActionListener(e -> {
                 int row = currentRow;
                 cancelCellEditing();
-                onClick.accept(row);       // row is a VIEW index
+                onClick.accept(row);
             });
         }
 
+        // runs when user clicks any cell from the table
+        // in this case update and delete cell is what we need for current row value
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {

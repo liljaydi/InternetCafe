@@ -1,11 +1,13 @@
 package ui;
 
+import service.ComputerService;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
 
-    public MainFrame() {
+    public MainFrame(ComputerService computerService) {
         setTitle("Internet Cafe Management System");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -13,7 +15,7 @@ public class MainFrame extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         SidebarPanel sidebar = new SidebarPanel();
-        ComputerManagerPanel content = new ComputerManagerPanel();
+        ComputerManagerPanel content = new ComputerManagerPanel(computerService);
 
         // TODO (later): replace the direct `content` with a content panel that uses CardLayout,
         // holding Dashboard, Computer Manager, Sessions History. The sidebar buttons will
